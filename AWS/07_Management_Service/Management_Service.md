@@ -39,7 +39,7 @@
 
 **💡 과정**
 
-```json
+```
 1. [Console] 서울 리전 두 번째 Network baseline 생성
 		- Resource Section 활용 VPC 생성
 		- Parameter Section 활용 Subnet 생성
@@ -220,7 +220,7 @@
 
 **💡 과정**
 
-```json
+```
 1. CloudWatch Alarm 구성
 2. CloudWatch Agent 설치 및 구성
 3. Custom Metric 수집
