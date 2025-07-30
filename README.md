@@ -7,3 +7,4 @@
 | 07.07~07.11 | Docker     |                                                   |
 | 07.14~07.18 | Kubernetes |                                                   |
 | 07.21~07.25 | AWS        | https://github.com/honi20/CloudWave/tree/main/AWS |
+| 07.29~08.06 | IaC        | https://github.com/honi20/CloudWave/tree/main/IaC |
