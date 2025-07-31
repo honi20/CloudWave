@@ -25,14 +25,28 @@
 **[ selinux 컨텍스트 설정 ]**
 
 ```yaml
+### file.yaml
+---
 - name: set context
-  file:
-    path: /path/to/samba_file
-    setype: samba_share_t
+  hosts: web
+  tasks:
+    - name: create file
+      file:
+        path: /tmp/samba_file
+        owner: ansible-user
+        mode: '0640'
+        state: touch
+
+    - name: selinux config
+      file:
+        path: /tmp/samba_file
+        setype: samba_share_t
 ```
 
 ```bash
 # 파일 확인
+$ ansible -a 'ls -alZ /tmp' web
+
 $ ls -Z samba_file
 -rw-r--r--.  owner group unconfined_u:object_r: samba_share_t :s0 samba_file
 ```
@@ -42,10 +56,15 @@ $ ls -Z samba_file
 **[ 파일 제거 ]**
 
 ```yaml
-- name: delete file if it's present
-  file:
-    dest: /path/to/file
-    state: absent    # 해당 파일이 존재하는 경우, 삭제 작업 수행
+### delete-file.yaml
+---
+- name: set context
+  hosts: web
+  tasks:
+    - name: delete file
+      file:
+        path: /tmp/samba_file
+        state: absent    # 해당 파일이 존재하는 경우, 삭제 작업 수행
 ```
 
 <br/>
@@ -132,24 +151,42 @@ $ ls -Z samba_file
 
 - 파일의 내용을 확인하고 수정하도록 지원
 - 단일 행을 수정하거나 혹은 여러 줄에 걸쳐 수정하도록 지원
+- 해당 라인이 이미 존재하면 changed 되지 않는다.
 
 ```yaml
-- name: lineinfile sample
-  lineinfile:
-    path: /path/to/file
-    line: 'Add this line to the file'
-    state: present
+### lineinfile.yaml
+---
+- name: lineinfile test
+  hosts: web
+  tasks: 
+    - name: add new line
+      lineinfile:
+        line: '1.1.1.1 test.dom'
+        path: /etc/hosts
+        state: present
+        # 해당 라인 삭제
+        # state: absent
 ```
+![image.png](img/image2.png)
+
+<br/>
 
 ```yaml
-- name: blockinfile sample
-  blockinfile:
-    path: /path/to/file
-    block: |
-      First line of block
-      Second line of block
-    state: present
+### blockinfile.yaml
+---
+- name: block in file
+  hosts: web
+  gather_facts: no
+  tasks:
+    - name: block add
+      blockinfile:
+        # > 기호: 가독성을 위해 한 줄을 끊어서 작성할 수 있게 해줌.
+        block: |
+          hello world
+          itworks
+        path: /var/www/html/index.html
 ```
+![image.png](img/image3.png)
 
 <br/>
 
@@ -203,6 +240,26 @@ tasks:
 - **관리호스트의 팩트**를 템플릿에서 변수로 사용할 수 있다.
 - 템플릿 파일은 대부분 **플레이북을 위한 프로젝트의 templates 디렉터리**에 보관된다.
 - 일반적으로 **`.j2`** 파일 확장자가 할당되어 파일이 Jinja2 템플릿 파일임을 나타내고 있다.
+
+```yaml
+### config.j2
+ServerName {{ ansible_fqdn }}
+HostName {{ ansible_hostname }}
+ListenAddress {{ ansible_facts['default_ipv4']['address'] }}
+```
+
+```yaml
+### template.yaml
+---
+- name: template test
+  hosts: web
+  tasks:
+    - name: copy template config
+      template:
+        src: config.j2
+        dest: /tmp/test.conf
+```
+![image.png](img/image4.png)
 
 <br/>
 
